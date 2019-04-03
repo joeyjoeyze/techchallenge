@@ -10,7 +10,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class ScrollingActivity extends AppCompatActivity {
+import com.example.a500pxpopularphotos.pojo.PagedPhotos;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ScrollingActivity extends BaseActivity {
+    TextView mDebugText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +26,20 @@ public class ScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        TextView t = (TextView) findViewById(R.id.secret_load);
-        t.setText(BuildConfig.consumer_key);
+        mDebugText = (TextView) findViewById(R.id.secret_load);
+        mDebugText.setText(BuildConfig.consumer_key);
 
+        api.getPopular().enqueue(new Callback<PagedPhotos>() {
+            @Override
+            public void onResponse(Call<PagedPhotos> call, Response<PagedPhotos> response) {
+                mDebugText.setText(response.body().toString());
+            }
+
+            @Override
+            public void onFailure(Call<PagedPhotos> call, Throwable t) {
+                mDebugText.setText("popular failed");
+            }
+        });
     }
 
     @Override
