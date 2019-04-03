@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -14,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import com.example.a500pxpopularphotos.pojo.Photo;
 
@@ -54,19 +57,21 @@ public class BrowsePopularFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mAdapter = new GridAdapter(R.layout.vertical_gallery_item);
+        mAdapter = new GridAdapter(R.layout.vertical_gallery_item, Glide.with(this));
 
         mRecyclerView.setAdapter(mAdapter);
 
-        mLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+        mLayoutManager = new GridLayoutManager(getContext(), 3);
         mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
 
     public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ImageViewHolder> {
         int mLayout;
-        public GridAdapter(int layout) {
+        RequestManager mGlide;
+        public GridAdapter(int layout, RequestManager glide) {
             mLayout = layout;
+            mGlide = glide;
         }
 
         @NonNull
@@ -79,7 +84,7 @@ public class BrowsePopularFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull ImageViewHolder imageViewHolder, int i) {
-            imageViewHolder.onBind(mVerticalGallery.get(i));
+            imageViewHolder.onBind(mGlide, mVerticalGallery.get(i));
         }
 
         @Override
@@ -97,9 +102,8 @@ public class BrowsePopularFragment extends BaseFragment {
                 mImage = view.findViewById(R.id.gallery_item);
             }
 
-            public void onBind(Photo photo) {
-                Glide.with(getContext())
-                        .load(photo.getImage_url()[0])
+            public void onBind(RequestManager glide, Photo photo) {
+                glide.load(photo.getImage_url()[0])
                         .into(mImage);
             }
         }
