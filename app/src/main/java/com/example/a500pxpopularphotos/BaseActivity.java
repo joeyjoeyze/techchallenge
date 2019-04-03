@@ -7,6 +7,9 @@ import com.example.a500pxpopularphotos.api.FiveHundredPixel;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -28,4 +31,21 @@ public class BaseActivity extends AppCompatActivity {
                     .build())
             .build();
     FiveHundredPixel api = retrofit.create(FiveHundredPixel.class);
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    // DO NOT REMOVE
+    @Subscribe
+    public void bootstrapEventBus(BaseActivity a) {
+    }
 }
