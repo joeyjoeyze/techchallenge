@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def apiFile = rootProject.file('apikey')
+def apiProps = new Properties()
+apiProps.load(new FileInputStream(apiFile))
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -9,6 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "consumer_key", apiProps["consumer_key"])
     }
     buildTypes {
         release {
