@@ -117,15 +117,21 @@ public class BrowsePopularFragment extends BaseFragment {
     @Subscribe
     public void onPagedPhotos(PagedPhotos pagedPhotos) {
         int page = pagedPhotos.getCurrent_page();
-        if (page > mCurrentPage) {
+        if (page == mCurrentPage + 1) {
             // this is a response for more of the current paginated photos
             // extend list of gallery images
             mVerticalGallery.addAll(Arrays.asList(pagedPhotos.getPhotos()));
-        } else {
+        } else if (page <= mCurrentPage) {
             // this is a refresh of new popular photos
             // delete current list of images and replace with response
+            Log.d("UI", "Cleared existing gallery images");
             mVerticalGallery.clear();
             mVerticalGallery.addAll(Arrays.asList(pagedPhotos.getPhotos()));
+        } else {
+            // we have received a page greater than current page + 1
+            // this indicates a response to a request made in the past that is no longer valid
+            // ignore this request
+            return;
         }
         mCurrentPage = page;
 

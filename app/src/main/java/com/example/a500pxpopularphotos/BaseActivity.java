@@ -16,6 +16,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class BaseActivity extends AppCompatActivity {
+    OkHttpClient okHttpClient = new OkHttpClient.Builder()
+//            .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+//            .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
+            .addInterceptor(new AddSecret())
+            .build();
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(FiveHundredPixel.ep)
             .addConverterFactory(
@@ -24,11 +29,7 @@ public class BaseActivity extends AppCompatActivity {
                             // we do not need to manually list every field in the POJO
                             // corresponding to the JSON
                             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)))
-            .client(new OkHttpClient.Builder()
-                    .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-                    .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS))
-                    .addInterceptor(new AddSecret())
-                    .build())
+            .client(okHttpClient)
             .build();
     FiveHundredPixel api = retrofit.create(FiveHundredPixel.class);
 

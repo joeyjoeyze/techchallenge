@@ -2,11 +2,13 @@ package com.example.a500pxpopularphotos;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
@@ -14,13 +16,13 @@ import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ScrollingActivity extends BaseActivity {
-    TextView mDebugText;
-
+    SwipeRefreshLayout mRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +31,17 @@ public class ScrollingActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mDebugText = (TextView) findViewById(R.id.secret_load);
-        mDebugText.setText(BuildConfig.consumer_key);
+        mRefresh = findViewById(R.id.refresh);
+        mRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // stop all ongoing requests for new pages
+                okHttpClient.dispatcher().cancelAll();
+
+                // request for page 1 again
+                requestPopular(1);
+            }
+        });
 
         // Load recyclerview into framelayout
         FragmentManager fm = getSupportFragmentManager();
@@ -71,16 +82,31 @@ public class ScrollingActivity extends BaseActivity {
                 // remove outstanding sticky events for page requests, if any
                 EventBus.getDefault().removeStickyEvent(ScollEndEvent.class);
 
+                if (mRefresh.isRefreshing()) {
+                    // Display toast to indicate refresh completed
+                    Toast.makeText(getApplicationContext(),
+                            "Displaying newest popular photos",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+
+                // dismiss pull down refresh circle
+                mRefresh.setRefreshing(false);
+
                 Log.v("NET", "Popular page request success " + response.body().getCurrent_page());
-                mDebugText.setText(response.body().toString());
                 EventBus.getDefault().post(response.body());
             }
 
             @Override
             public void onFailure(Call<PagedPhotos> call, Throwable t) {
+                // remove outstanding sticky events for page requests, if any
+                EventBus.getDefault().removeStickyEvent(ScollEndEvent.class);
+
+                // dismiss pull down refresh circle
+                mRefresh.setRefreshing(false);
+
                 // TODO
                 Log.e("NET", "Popular page request failed");
-                mDebugText.setText("popular failed");
             }
         });
     }
