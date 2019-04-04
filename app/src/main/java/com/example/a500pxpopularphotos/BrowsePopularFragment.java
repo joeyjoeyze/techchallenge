@@ -3,23 +3,21 @@ package com.example.a500pxpopularphotos;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import com.example.a500pxpopularphotos.pojo.Photo;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -32,6 +30,7 @@ public class BrowsePopularFragment extends BaseFragment {
     protected RecyclerView.LayoutManager mLayoutManager;
     protected RecyclerView.Adapter mAdapter;
 
+    int GRID_SPAN = 3;
 
     // Pagination State
     int mCurrentPage = 0;
@@ -61,7 +60,7 @@ public class BrowsePopularFragment extends BaseFragment {
 
         mRecyclerView.setAdapter(mAdapter);
 
-        mLayoutManager = new GridLayoutManager(getContext(), 3);
+        mLayoutManager = new GridLayoutManager(getContext(), GRID_SPAN);
         mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
@@ -84,6 +83,11 @@ public class BrowsePopularFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull ImageViewHolder imageViewHolder, int i) {
+            // displaying final row or final two rows
+            if (i >= (getItemCount() - GRID_SPAN - 1) && EventBus.getDefault().getStickyEvent(ScollEndEvent.class) == null){
+                // request the next page if no requests exist
+                EventBus.getDefault().postSticky(new ScollEndEvent(mCurrentPage + 1));
+            }
             imageViewHolder.onBind(mGlide, mVerticalGallery.get(i));
         }
 
@@ -124,7 +128,8 @@ public class BrowsePopularFragment extends BaseFragment {
             mVerticalGallery.addAll(Arrays.asList(pagedPhotos.getPhotos()));
         }
         mCurrentPage = page;
-        // update list
+
+        // ask adapter to display new items
         Log.d("UI", "vertical gallery updated. Page " + mCurrentPage);
         mAdapter.notifyDataSetChanged();
     }

@@ -1,25 +1,18 @@
 package com.example.a500pxpopularphotos;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
-import com.example.a500pxpopularphotos.pojo.Photo;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,20 +38,7 @@ public class ScrollingActivity extends BaseActivity {
                 .replace(R.id.gallery_frame, BrowsePopularFragment.newInstance())
                 .commit();
 
-        // send request to api for popular photos
-        api.getPopular().enqueue(new Callback<PagedPhotos>() {
-            @Override
-            public void onResponse(Call<PagedPhotos> call, Response<PagedPhotos> response) {
-                mDebugText.setText(response.body().toString());
-                EventBus.getDefault().post(response.body());
-            }
-
-            @Override
-            public void onFailure(Call<PagedPhotos> call, Throwable t) {
-                // TODO
-                mDebugText.setText("popular failed");
-            }
-        });
+        requestPopular(1);
     }
 
     @Override
@@ -80,5 +60,35 @@ public class ScrollingActivity extends BaseActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void requestPopular(int page) {
+
+        // send request to api for popular photos
+        api.getPopular(page).enqueue(new Callback<PagedPhotos>() {
+            @Override
+            public void onResponse(Call<PagedPhotos> call, Response<PagedPhotos> response) {
+                // remove outstanding sticky events for page requests, if any
+                EventBus.getDefault().removeStickyEvent(ScollEndEvent.class);
+
+                Log.v("NET", "Popular page request success " + response.body().getCurrent_page());
+                mDebugText.setText(response.body().toString());
+                EventBus.getDefault().post(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<PagedPhotos> call, Throwable t) {
+                // TODO
+                Log.e("NET", "Popular page request failed");
+                mDebugText.setText("popular failed");
+            }
+        });
+    }
+
+    @Subscribe
+    public void onScrollEndEvent(ScollEndEvent e) {
+        // fetch more pages
+        Log.d("NET", "Requesting popular page " + e.page);
+        requestPopular(e.page);
     }
 }
