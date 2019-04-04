@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +25,9 @@ import retrofit2.Response;
 
 public class ScrollingActivity extends BaseActivity {
     SwipeRefreshLayout mRefresh;
+    int mGalleryItemWidth;
+    int mScreenHeight;
+    ImageSize mImageSize = new ImageSize();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,14 @@ public class ScrollingActivity extends BaseActivity {
             }
         });
 
+        // fetch horizontal length for width of each gallery item
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        mGalleryItemWidth = width / BrowsePopularFragment.GRID_SPAN;
+        mScreenHeight = height;
+
         // Load recyclerview into framelayout
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
@@ -51,6 +64,8 @@ public class ScrollingActivity extends BaseActivity {
 
         requestPopular(1);
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,9 +89,15 @@ public class ScrollingActivity extends BaseActivity {
     }
 
     private void requestPopular(int page) {
+        // Calculate image sizes
+        int widthId = mImageSize.CalculateSquareSize(mGalleryItemWidth);
+        int croppedId = mImageSize.CalculateLongestEdge(mScreenHeight);
+        String imageIds = Integer.toString(widthId) + ',' + Integer.toString(croppedId);
+        Log.d("NET", "item width " + mGalleryItemWidth + " screen heigh " + mScreenHeight  + " image_size IDs " + imageIds);
 
         // send request to api for popular photos
-        api.getPopular(page).enqueue(new Callback<PagedPhotos>() {
+        api.getPopular(page, imageIds)
+                .enqueue(new Callback<PagedPhotos>() {
             @Override
             public void onResponse(Call<PagedPhotos> call, Response<PagedPhotos> response) {
                 // remove outstanding sticky events for page requests, if any
@@ -88,7 +109,6 @@ public class ScrollingActivity extends BaseActivity {
                             "Displaying newest popular photos",
                             Toast.LENGTH_SHORT).show();
                 }
-
 
                 // dismiss pull down refresh circle
                 mRefresh.setRefreshing(false);

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.example.a500pxpopularphotos.api.FiveHundredPixel;
 import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import com.example.a500pxpopularphotos.pojo.Photo;
@@ -30,7 +31,7 @@ public class BrowsePopularFragment extends BaseFragment {
     protected RecyclerView.LayoutManager mLayoutManager;
     protected RecyclerView.Adapter mAdapter;
 
-    int GRID_SPAN = 3;
+    public static int GRID_SPAN = 3;
 
     // Pagination State
     int mCurrentPage = 0;
@@ -107,7 +108,7 @@ public class BrowsePopularFragment extends BaseFragment {
             }
 
             public void onBind(RequestManager glide, Photo photo) {
-                glide.load(photo.getImage_url()[0])
+                glide.load(photo.getImage_url()[FiveHundredPixel.SMALL_IMG_INDEX])
                         .into(mImage);
             }
         }
