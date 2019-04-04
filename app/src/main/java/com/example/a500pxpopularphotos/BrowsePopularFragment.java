@@ -1,5 +1,6 @@
 package com.example.a500pxpopularphotos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -89,6 +90,17 @@ public class BrowsePopularFragment extends BaseFragment {
                 // request the next page if no requests exist
                 EventBus.getDefault().postSticky(new ScollEndEvent(mCurrentPage + 1));
             }
+
+            imageViewHolder.mRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent openFullscreen = new Intent(getContext(), FullscreenImageActivity.class);
+                    openFullscreen.putExtra(FullscreenImageActivity.IMAGE_URL,
+                            mVerticalGallery.get(i).getImage_url()[FiveHundredPixel.LARGE_IMG_INDEX]);
+                    startActivity(openFullscreen);
+                }
+            });
+
             imageViewHolder.onBind(mGlide, mVerticalGallery.get(i));
         }
 
@@ -117,6 +129,8 @@ public class BrowsePopularFragment extends BaseFragment {
 
     @Subscribe
     public void onPagedPhotos(PagedPhotos pagedPhotos) {
+        // TODO remove duplicates during updating list
+
         int page = pagedPhotos.getCurrent_page();
         if (page == mCurrentPage + 1) {
             // this is a response for more of the current paginated photos
