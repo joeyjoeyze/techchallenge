@@ -8,17 +8,15 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.a500pxpopularphotos.api.ImageSize;
 import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

@@ -1,4 +1,4 @@
-package com.example.a500pxpopularphotos;
+package com.example.a500pxpopularphotos.api;
 
 import android.util.Log;
 

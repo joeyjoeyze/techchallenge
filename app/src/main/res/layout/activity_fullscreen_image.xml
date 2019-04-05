@@ -14,11 +14,12 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="480dp"
+        android:layout_height="360dp"
         app:cardCornerRadius="20dp"
         android:layout_alignParentBottom="true"
-        android:translationY="420dp"
-        android:id="@+id/fullscreen_card">
+        android:id="@+id/fullscreen_card"
+        android:translationY="300dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -28,20 +29,92 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp">
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/fullname"
                 android:text="First Last"
                 android:textStyle="bold"
                 />
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/title"
                 android:text="Sample Title"
                 android:textStyle="bold|italic"
                 android:textSize="18sp"
                 />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#000000"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Category -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    style="InfoText"
+                    android:text="CATEGORY:"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/category"
+                    style="InfoText"
+                    android:text="CATEGORY: SAMPLE"/>
+            </LinearLayout>
+
+            <!-- Time Posted -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_access_time_black_24dp"
+                    android:layout_marginRight="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/time"
+                    android:text="12 hours ago"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <!-- Location -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_map_black_24dp"
+                    android:layout_marginRight="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/location"
+                    android:text="Country"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:id="@+id/description"
+                android:text="Description"
+                android:scrollbars="vertical"/>
+            
 
         </LinearLayout>
 
