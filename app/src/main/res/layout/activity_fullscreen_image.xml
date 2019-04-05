@@ -4,9 +4,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="#000000"
+    android:longClickable="true"
+    android:id="@+id/fullscreen_root">
     <com.ortiz.touchview.TouchImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fullscreen_image" />
+        android:id="@+id/fullscreen_image"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        app:cardCornerRadius="20dp"
+        android:layout_alignParentBottom="true"
+        android:translationY="420dp"
+        android:id="@+id/fullscreen_card"
+        >
+
+    </android.support.v7.widget.CardView>
 </RelativeLayout>
