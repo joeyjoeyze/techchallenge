@@ -18,10 +18,12 @@ import com.example.a500pxpopularphotos.api.FiveHundredPixel;
 import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import com.example.a500pxpopularphotos.pojo.Photo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,10 +96,14 @@ public class BrowsePopularFragment extends BaseFragment {
             imageViewHolder.mRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent openFullscreen = new Intent(getContext(), FullscreenImageActivity.class);
-                    openFullscreen.putExtra(FullscreenImageActivity.IMAGE_URL,
-                            mVerticalGallery.get(i).getImage_url()[FiveHundredPixel.LARGE_IMG_INDEX]);
-                    startActivity(openFullscreen);
+                    try {
+                        Intent openFullscreen = new Intent(getContext(), FullscreenImageActivity.class);
+                        String ser = new ObjectMapper().writeValueAsString(mVerticalGallery.get(i));
+                        openFullscreen.putExtra(FullscreenImageActivity.PHOTO_INFO, ser);
+                        startActivity(openFullscreen);
+                    } catch (IOException e) {
+                        Log.e("EX", e.getLocalizedMessage());
+                    }
                 }
             });
 

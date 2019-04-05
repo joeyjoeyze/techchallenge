@@ -13,18 +13,28 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.a500pxpopularphotos.api.FiveHundredPixel;
+import com.example.a500pxpopularphotos.pojo.Photo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ortiz.touchview.TouchImageView;
 
+import java.io.IOException;
+
 public class FullscreenImageActivity extends BaseActivity {
+    public static String PHOTO_INFO = "PHOTO_INFO";
+
     TouchImageView mFullscreenImage;
-    public static String IMAGE_URL;
     GestureDetectorCompat mFling;
     CardView mInfoCard;
+    TextView mFullname;
+    TextView mTitle;
 
+    Photo mPhoto;
     boolean mCardRaised = false;
     int mDisplayHeight;
 
@@ -35,7 +45,17 @@ public class FullscreenImageActivity extends BaseActivity {
 
         mFullscreenImage = (TouchImageView) findViewById(R.id.fullscreen_image);
         mInfoCard = (CardView) findViewById(R.id.fullscreen_card);
+        mFullname = (TextView) findViewById(R.id.fullname);
+        mTitle = (TextView) findViewById(R.id.title);
 
+        try {
+            Intent intent = getIntent();
+            String photoSer = intent.getStringExtra(PHOTO_INFO);
+            mPhoto = new ObjectMapper().readValue(photoSer, Photo.class);
+        } catch (IOException e) {
+            Log.e("EX", e.getLocalizedMessage());
+            finish();
+        }
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -50,20 +70,20 @@ public class FullscreenImageActivity extends BaseActivity {
             }
         });
 
-        Intent intent = getIntent();
-        String imageUrl = intent.getStringExtra(IMAGE_URL);
-
         mFling = new GestureDetectorCompat(this, new FlingGestureListener());
 
         Glide.with(this)
                 .asBitmap()
-                .load(imageUrl)
+                .load(mPhoto.getImage_url()[FiveHundredPixel.LARGE_IMG_INDEX])
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         mFullscreenImage.setImageBitmap(resource);
                     }
                 });
+
+        mFullname.setText(mPhoto.getUser().getFullname());
+        mTitle.setText(mPhoto.getName());
     }
 
     public class FlingGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -82,7 +102,6 @@ public class FullscreenImageActivity extends BaseActivity {
                     mCardRaised = true;
                 }
             }
-            Log.d("UI", "fling unknown");
             return true;
         }
     }
@@ -91,6 +110,7 @@ public class FullscreenImageActivity extends BaseActivity {
         mInfoCard.animate().translationY(0);
     }
     private void lowerCard() {
+        // just hide the entire card all together
         mInfoCard.animate().translationY(mDisplayHeight);
     }
 }
