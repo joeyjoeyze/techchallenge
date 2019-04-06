@@ -26,6 +26,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class BrowsePopularFragment extends BaseFragment {
@@ -39,6 +40,7 @@ public class BrowsePopularFragment extends BaseFragment {
     // Pagination State
     int mCurrentPage = 0;
     List<Photo> mVerticalGallery = new ArrayList<>();
+    HashSet<Integer> mExistingPhotoIds = new HashSet<>();
 
     public static BrowsePopularFragment newInstance() {
 
@@ -135,19 +137,28 @@ public class BrowsePopularFragment extends BaseFragment {
 
     @Subscribe
     public void onPagedPhotos(PagedPhotos pagedPhotos) {
-        // TODO remove duplicates during updating list
-
         int page = pagedPhotos.getCurrent_page();
+        List<Photo> photos = Arrays.asList(pagedPhotos.getPhotos());
         if (page == mCurrentPage + 1) {
             // this is a response for more of the current paginated photos
             // extend list of gallery images
-            mVerticalGallery.addAll(Arrays.asList(pagedPhotos.getPhotos()));
+            for (Photo p : photos) {
+                if (!mExistingPhotoIds.contains(p.getId())) {
+                    mVerticalGallery.add(p);
+                    mExistingPhotoIds.add(p.getId());
+                }
+            }
         } else if (page <= mCurrentPage) {
             // this is a refresh of new popular photos
             // delete current list of images and replace with response
             Log.d("UI", "Cleared existing gallery images");
             mVerticalGallery.clear();
-            mVerticalGallery.addAll(Arrays.asList(pagedPhotos.getPhotos()));
+            mVerticalGallery.addAll(photos);
+
+            mExistingPhotoIds.clear();
+            for (Photo p : photos) {
+                mExistingPhotoIds.add(p.getId());
+            }
         } else {
             // we have received a page greater than current page + 1
             // this indicates a response to a request made in the past that is no longer valid
