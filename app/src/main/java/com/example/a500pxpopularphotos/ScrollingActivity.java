@@ -8,6 +8,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.a500pxpopularphotos.api.ImageSize;
@@ -27,6 +29,9 @@ public class ScrollingActivity extends BaseActivity {
     int mScreenHeight;
     ImageSize mImageSize = new ImageSize();
 
+    View mErrorView;
+    View mGalleryFrame;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +40,17 @@ public class ScrollingActivity extends BaseActivity {
         setSupportActionBar(toolbar);
 
         mRefresh = findViewById(R.id.refresh);
+        mGalleryFrame = findViewById(R.id.gallery_frame);
+        mErrorView = findViewById(R.id.error_view);
+
+        mErrorView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // prevent any click events from propogating to gallery
+                return true;
+            }
+        });
+
         mRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -113,6 +129,8 @@ public class ScrollingActivity extends BaseActivity {
 
                 Log.v("NET", "Popular page request success " + response.body().getCurrent_page());
                 EventBus.getDefault().post(response.body());
+
+                mGalleryFrame.bringToFront();
             }
 
             @Override
@@ -123,8 +141,8 @@ public class ScrollingActivity extends BaseActivity {
                 // dismiss pull down refresh circle
                 mRefresh.setRefreshing(false);
 
-                // TODO
                 Log.e("NET", "Popular page request failed");
+                mErrorView.bringToFront();
             }
         });
     }
