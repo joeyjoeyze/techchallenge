@@ -1,11 +1,13 @@
 package com.example.a500pxpopularphotos;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,11 @@ import com.example.a500pxpopularphotos.event.ScollEndEvent;
 import com.example.a500pxpopularphotos.pojo.PagedPhotos;
 import com.example.a500pxpopularphotos.pojo.Photo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -32,15 +39,17 @@ import java.util.List;
 public class BrowsePopularFragment extends BaseFragment {
 
     protected RecyclerView mRecyclerView;
-    protected RecyclerView.LayoutManager mLayoutManager;
+    protected FlexboxLayoutManager mLayoutManager;
     protected RecyclerView.Adapter mAdapter;
 
-    public static int GRID_SPAN = 3;
+    public static int NUM_COLUMNS = 2;
 
     // Pagination State
     int mCurrentPage = 0;
     List<Photo> mVerticalGallery = new ArrayList<>();
     HashSet<Integer> mExistingPhotoIds = new HashSet<>();
+
+    int mDisplayWidth;
 
     public static BrowsePopularFragment newInstance() {
 
@@ -66,10 +75,24 @@ public class BrowsePopularFragment extends BaseFragment {
 
         mRecyclerView.setAdapter(mAdapter);
 
-        mLayoutManager = new GridLayoutManager(getContext(), GRID_SPAN);
+        mLayoutManager = new FlexboxLayoutManager(getContext());
+        mLayoutManager.setFlexDirection(FlexDirection.ROW);
+        mLayoutManager.setJustifyContent(JustifyContent.SPACE_BETWEEN);
+        mLayoutManager.setFlexWrap(FlexWrap.WRAP);
+        mLayoutManager.setAlignItems(AlignItems.STRETCH);
+
         mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+        mDisplayWidth = width;
+    }
 
     public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ImageViewHolder> {
         int mLayout;
@@ -90,7 +113,7 @@ public class BrowsePopularFragment extends BaseFragment {
         @Override
         public void onBindViewHolder(@NonNull ImageViewHolder imageViewHolder, int i) {
             // displaying final row or final two rows
-            if (i >= (getItemCount() - GRID_SPAN - 1) && EventBus.getDefault().getStickyEvent(ScollEndEvent.class) == null){
+            if (i >= (getItemCount() - NUM_COLUMNS - 1) && EventBus.getDefault().getStickyEvent(ScollEndEvent.class) == null){
                 // request the next page if no requests exist
                 EventBus.getDefault().postSticky(new ScollEndEvent(mCurrentPage + 1));
             }
@@ -109,12 +132,34 @@ public class BrowsePopularFragment extends BaseFragment {
                 }
             });
 
-            imageViewHolder.onBind(mGlide, mVerticalGallery.get(i));
+            // calculate height from image aspect ratio
+            Photo thisPhoto = mVerticalGallery.get(i);
+            int rowStartIndex = (i / NUM_COLUMNS) * NUM_COLUMNS;
+            List<Point> rowImages = new ArrayList<>();
+            for (int imgIndex = rowStartIndex; imgIndex < rowStartIndex + NUM_COLUMNS; imgIndex++) {
+                Photo image = mVerticalGallery.get(imgIndex);
+                rowImages.add(new Point(image.getWidth(), image.getHeight()));
+            }
+
+            // height and width in pixels
+            double height = calculateHeight(rowImages);
+            int heightPixel = (int)Math.floor(height);
+            int widthPixel = (int)Math.floor(height * ((double)thisPhoto.getWidth()/thisPhoto.getHeight()));
+
+            Log.v("UI", "Display dims W:" + mDisplayWidth);
+            Log.v("UI", "Name:" + thisPhoto.getName());
+            Log.v("UI", "Original dims and aspect ratio W:" + thisPhoto.getWidth() + " H:" + thisPhoto.getHeight() + " AR:" + (double)thisPhoto.getWidth() / thisPhoto.getHeight());
+            Log.v("UI", "Display dims and aspect ratio W:" + widthPixel + " H:" + heightPixel + " AR:" + (double)widthPixel / heightPixel);
+
+            imageViewHolder.onBind(mGlide, mVerticalGallery.get(i), widthPixel, heightPixel);
         }
 
         @Override
         public int getItemCount() {
-            return mVerticalGallery.size();
+            // always return count as a multiple of NUM_COLUMNS
+            // the remaining possible undisplayed items will be shown after the network request for the next page finishes
+            // This removes cases where we need to calculate the height and width of x elements in a row where x is less than NUM_COLUMNS
+            return mVerticalGallery.size() - (mVerticalGallery.size() % NUM_COLUMNS);
         }
 
         public class ImageViewHolder extends RecyclerView.ViewHolder {
@@ -127,8 +172,12 @@ public class BrowsePopularFragment extends BaseFragment {
                 mImage = view.findViewById(R.id.gallery_item);
             }
 
-            public void onBind(RequestManager glide, Photo photo) {
+            public void onBind(RequestManager glide, Photo photo, int width, int height) {
+                // predetermine imageview size before loading image
+                // resizing imageview after glide loads the image from networks results in incorrect width
+                mImage.setLayoutParams(new FlexboxLayoutManager.LayoutParams(width, height));
                 glide.load(photo.getImage_url()[FiveHundredPixel.SMALL_IMG_INDEX])
+                        .override(width,height)
                         .into(mImage);
             }
         }
@@ -170,6 +219,15 @@ public class BrowsePopularFragment extends BaseFragment {
         // ask adapter to display new items
         Log.d("UI", "vertical gallery updated. Page " + mCurrentPage);
         mAdapter.notifyDataSetChanged();
+    }
+
+    private double calculateHeight(List<Point> images) {
+        double ratioSum = 0;
+        for (Point image : images) {
+            ratioSum += (double)image.x / image.y;
+        }
+
+        return (double)mDisplayWidth / ratioSum;
     }
 
 }

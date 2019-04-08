@@ -67,7 +67,7 @@ public class GalleryActivity extends BaseActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-        mGalleryItemWidth = width / BrowsePopularFragment.GRID_SPAN;
+        mGalleryItemWidth = width / BrowsePopularFragment.NUM_COLUMNS;
         mScreenHeight = height;
 
         // Load recyclerview into framelayout
@@ -104,9 +104,10 @@ public class GalleryActivity extends BaseActivity {
 
     private void requestPopular(int page) {
         // Calculate image sizes
-        int widthId = mImageSize.CalculateSquareSize(mGalleryItemWidth);
-        int croppedId = mImageSize.CalculateLongestEdge(mScreenHeight);
-        String imageIds = Integer.toString(widthId) + ',' + Integer.toString(croppedId);
+        // fetch uncropped image for thumbnails
+        int thumbnailId = 20;
+        int fullscreenId = mImageSize.CalculateLongestEdge(mScreenHeight);
+        String imageIds = Integer.toString(thumbnailId) + ',' + Integer.toString(fullscreenId);
         Log.d("NET", "item width " + mGalleryItemWidth + " screen heigh " + mScreenHeight  + " image_size IDs " + imageIds);
 
         // send request to api for popular photos
