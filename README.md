@@ -1,4 +1,4 @@
-# Design
+# 500px Popular Photos
 Retrofit to consume JSON API.
 
 Jackson to handle JSON to POJO and reverse.
@@ -13,7 +13,4 @@ Clicking on TitleBar scrolls the gallery to the very top.
 
 Glide by default caches images on disk.
 
-# Improvements
-Gallery should display images with their native aspect ratio.
-
-
+Gallery displays thumbnails in their native aspect ratio.
