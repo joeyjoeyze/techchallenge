@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -26,7 +25,6 @@ import com.example.a500pxpopularphotos.pojo.Photo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ortiz.touchview.TouchImageView;
 
-import org.threeten.bp.Instant;
 import org.threeten.bp.ZonedDateTime;
 
 import java.io.IOException;
@@ -60,14 +58,14 @@ public class FullscreenImageActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen_image);
 
-        mFullscreenImage = (TouchImageView) findViewById(R.id.fullscreen_image);
-        mInfoCard = (CardView) findViewById(R.id.fullscreen_card);
-        mFullname = (TextView) findViewById(R.id.fullname);
-        mTitle = (TextView) findViewById(R.id.title);
-        mCategory = (TextView) findViewById(R.id.category);
-        mTime = (TextView) findViewById(R.id.time);
-        mLocation = (TextView) findViewById(R.id.location);
-        mDescription = (TextView) findViewById(R.id.description);
+        mFullscreenImage = findViewById(R.id.fullscreen_image);
+        mInfoCard = findViewById(R.id.fullscreen_card);
+        mFullname = findViewById(R.id.fullname);
+        mTitle = findViewById(R.id.title);
+        mCategory = findViewById(R.id.category);
+        mTime = findViewById(R.id.time);
+        mLocation = findViewById(R.id.location);
+        mDescription = findViewById(R.id.description);
 
         try {
             Intent intent = getIntent();

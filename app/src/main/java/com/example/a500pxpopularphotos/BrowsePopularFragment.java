@@ -64,7 +64,7 @@ public class BrowsePopularFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.recyclerview, container, false);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.gallery_recycler);
+        mRecyclerView = view.findViewById(R.id.gallery_recycler);
         return view;
     }
 
@@ -123,7 +123,7 @@ public class BrowsePopularFragment extends BaseFragment {
                 public void onClick(View v) {
                     try {
                         Intent openFullscreen = new Intent(getContext(), FullscreenImageActivity.class);
-                        String ser = new ObjectMapper().writeValueAsString(mVerticalGallery.get(i));
+                        String ser = new ObjectMapper().writeValueAsString(mVerticalGallery.get(imageViewHolder.getAdapterPosition()));
                         openFullscreen.putExtra(FullscreenImageActivity.PHOTO_INFO, ser);
                         startActivity(openFullscreen);
                     } catch (IOException e) {
